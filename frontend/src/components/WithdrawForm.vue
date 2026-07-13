@@ -1,101 +1,84 @@
 <script setup>
 import { ref, watch, onMounted, computed } from "vue";
 import api from "../services/api.js";
-import Multiselect from "vue-multiselect"
-import "vue-multiselect/dist/vue-multiselect.css"
+import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.css";
 
 const props = defineProps({
   initialData: {
     type: Object,
     default: () => ({
-      item_id:"",
+      item_id: "",
       employee_id: "",
       location: "",
-      quantity: 0,
+      quantity: 1,
+      notes: "",
     }),
   },
-
-  submitLabel: {
-    type: String,
-    default: "Simpan",
-  },
-
-  loading: {
-    type: Boolean,
-    default: false,
-  },
+  submitLabel: { type: String, default: "Simpan" },
+  loading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(["submit", "cancel"]);
+const emit = defineEmits(["submit"]);
 
-const items = ref([])
-const employees = ref([])
+const items = ref([]);
+const employees = ref([]);
 
 onMounted(async () => {
   try {
-    const requests = [
-      api.get("/employees"),
-    ]
+    const requests = [api.get("/employees")];
+
     if (!props.initialData?.item_id) {
-      requests.unshift(api.get("/items/tool"))
+      requests.unshift(api.get("/items/material")); // ← only materials
     } else {
-      requests.unshift(api.get(`/items/${props.initialData.item_id}`))
+      requests.unshift(api.get(`/items/${props.initialData.item_id}`));
     }
 
-    const [itemsRes, employeesRes] = await Promise.all(requests)
+    const [itemsRes, employeesRes] = await Promise.all(requests);
 
-    
-    items.value = props.initialData?.item_id 
-      ? [itemsRes.data]  
-      : itemsRes.data     
+    items.value = props.initialData?.item_id
+      ? [itemsRes.data]
+      : itemsRes.data;
 
-    employees.value = employeesRes.data
+    employees.value = employeesRes.data;
   } catch (error) {
-    console.error("Failed to load assignment data", error)
+    console.error("Failed to load withdraw data", error);
   }
-})
+});
 
 const form = ref({
   item_id: null,
   employee_id: null,
-  location: null,
+  location: "",
   quantity: 1,
   notes: "",
 });
 
-const selectedItem = ref(null)
-const selectedEmployee = ref(null)
+const selectedItem = ref(null);
+const selectedEmployee = ref(null);
 
-watch(
-  () => props.initialData,
-  (value) => {
-    form.value = { ...value };
-  },
-  { immediate: true }
-);
-
+watch(() => props.initialData, (value) => {
+  form.value = { ...value };
+}, { immediate: true });
 
 watch([items, () => form.value.item_id], ([itemList, itemId]) => {
-  selectedItem.value = itemList.find(i => i.id === itemId) || null
-})
+  selectedItem.value = itemList.find(i => i.id === itemId) || null;
+});
 
 watch([employees, () => form.value.employee_id], ([empList, empId]) => {
-  selectedEmployee.value = empList.find(e => e.id === empId) || null
-})
-
+  selectedEmployee.value = empList.find(e => e.id === empId) || null;
+});
 
 const onItemSelect = (option) => {
-  form.value.item_id = option ? option.id : null
-}
+  form.value.item_id = option ? option.id : null;
+};
 
 const onEmployeeSelect = (option) => {
-  form.value.employee_id = option ? option.id : null
-}
+  form.value.employee_id = option ? option.id : null;
+};
 
-const isItemLocked = computed(() => !!props.initialData?.item_id)
-
-
-const employeeLabel = (employee) => `${employee.first_name} ${employee.last_name}`
+const isItemLocked = computed(() => !!props.initialData?.item_id);
+const employeeLabel = (e) => `${e.first_name} ${e.last_name}`;
 
 const submitForm = () => {
   emit("submit", { ...form.value });
@@ -105,18 +88,16 @@ const submitForm = () => {
 <template>
   <div class="card item-form-card">
     <form @submit.prevent="submitForm">
-
       <div class="form-group">
-        <label>Barang</label>
+        <label>Material</label>
         <Multiselect
           v-model="selectedItem"
           :options="items"
           label="name"
           track-by="id"
-          placeholder="Pilih item"
-          :disabled="isItemLocked"      
+          placeholder="Pilih material"
+          :disabled="isItemLocked"
           @update:model-value="onItemSelect"
-          required
         />
         <small v-if="isItemLocked" style="color: var(--text-muted)">
           Item sudah dipilih otomatis
@@ -124,20 +105,21 @@ const submitForm = () => {
       </div>
 
       <div class="form-group">
-        <label>Diambil Oleh</label>
+        <label>
+          Diambil Oleh
+        </label>
         <Multiselect
           v-model="selectedEmployee"
           :options="employees"
           :custom-label="employeeLabel"
           track-by="id"
-          placeholder="Pilih karyawan"
+          placeholder="Pilih karyawan..."
           @update:model-value="onEmployeeSelect"
-          required
         />
       </div>
 
       <div class="form-group">
-        <label>Quantity</label>
+        <label>Jumlah</label>
         <input
           v-model.number="form.quantity"
           type="number"
@@ -155,22 +137,17 @@ const submitForm = () => {
         />
       </div>
 
-
-
       <div class="form-group">
-        <label>Catatan</label>
-
-        <input
-          v-model="form.notes"
-          type="text"
-        />
+        <label>
+          Catatan
+        </label>
+        <input v-model="form.notes" type="text" placeholder="Catatan tambahan..." />
       </div>
 
       <div class="form-actions">
         <button type="button" class="btn-ghost" @click="$emit('cancel')">
           Batal
         </button>
-
         <button type="submit" class="btn-acid" :disabled="loading">
           {{ loading ? "Menyimpan..." : submitLabel }}
         </button>
@@ -203,12 +180,15 @@ const submitForm = () => {
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--white);
+  color: var(--text);
 }
 
-.form-checkbox {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.form-group input:focus {
+  outline: none;
+  border-color: var(--text);
 }
 
 .form-actions {

@@ -137,6 +137,10 @@ img {
     border-color: var(--text);
 }
 
+.btn-small {
+  padding: 8px 14px;
+  font-size: 12px;
+}
 /* ===== NAVIGATION ===== */
 .nav {
     position: fixed;
@@ -476,7 +480,7 @@ img {
 
 .dash-table-row {
     display: grid;
-    grid-template-columns: 1.5fr 1.5fr 1.5fr 1fr 100px;
+    grid-template-columns: 1.5fr 1.5fr 1.5fr 0.5fr 0.5fr auto;
     padding: 12px 20px;
     align-items: center;
     border-bottom: 1px solid var(--border-light);
@@ -649,7 +653,7 @@ img {
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1.1;
-    max-width: 600px;
+    max-width: 840px;
     margin: 0 auto;
 }
 

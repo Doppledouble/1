@@ -43,7 +43,7 @@ def withdraw_material(item_id: int, data: StockWithdrawRequest, db: Session = De
 
     return transaction
 
-# get all item's transaction history    
+   
 @router.get("/items/{item_id}/history", response_model=list[StockTransactionResponse])
 def get_item_history(item_id: int, db: Session = Depends(get_db)):
     item = db.query(Item).filter(Item.id == item_id).first()
@@ -60,7 +60,7 @@ def get_item_history(item_id: int, db: Session = Depends(get_db)):
         .all()
     )
 
-# get all transactions of all items
+
 @router.get("/", response_model=list[StockTransactionResponse])
 def get_transactions(db: Session = Depends(get_db)):
     return (

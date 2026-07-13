@@ -16,7 +16,6 @@ router = APIRouter(prefix="/items", tags=["Items"])
 @router.post("/", response_model=ItemResponse)
 def create_item(item: ItemCreate, db: Session = Depends(get_db)):
     
-    # Check if an inactive item with the same name already exists
     existing_item = db.query(Item).filter(
         Item.name == item.name,
         Item.is_active == False
@@ -146,7 +145,6 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # check if item has any active assignments
     active_assignment = db.query(Assignment).filter(
         Assignment.item_id == item_id,
         Assignment.returned_at.is_(None) 

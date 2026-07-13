@@ -7,8 +7,7 @@ const props = defineProps({
     default: () => ({
       first_name: "",
       last_name: "",
-      email: null,
-      is_admin: false,
+      contact: null,
     }),
   },
 
@@ -31,8 +30,7 @@ const emit = defineEmits([
 const form = ref({
   first_name: "",
   last_name: "",
-  email: null,
-  is_admin: false,
+  contact: null,
 });
 
 watch(
@@ -46,8 +44,8 @@ watch(
 const submitForm = () => {
   emit("submit", 
   { ...form.value,
-    email:
-      form.value.email?.trim() || null,
+    contact:
+      form.value.contact?.trim() || null,
    });
 };
 </script>
@@ -77,24 +75,13 @@ const submitForm = () => {
       </div>
 
       <div class="form-group">
-        <label>Email</label>
+        <label>Contact</label>
 
         <input
-          v-model="form.email"
-          type="email"
+          v-model="form.contact"
+          type="tel"
+          placeholder="08xxxxxxxxxx"
         />
-      </div>
-
-      <div class="form-checkbox">
-        <input
-          id="is_admin"
-          v-model="form.is_admin"
-          type="checkbox"
-        />
-
-        <label for="is_admin">
-          Administrator
-        </label>
       </div>
 
       <div class="form-actions">

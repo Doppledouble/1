@@ -132,9 +132,6 @@ const getAssignmentActions = (assignment) => [
           class="dash-table-row"
         >
           <div class="dash-cell dash-cell-name">
-            <div class="dash-cell-icon">
-              {{ assignment.item?.name?.charAt(0) }}
-            </div>
             {{ assignment.item?.name }}
           </div>
 
@@ -163,7 +160,7 @@ const getAssignmentActions = (assignment) => [
           v-if="assignments.length === 0"
           class="empty-state"
         >
-          Belum ada data barang.
+          Belum ada data pemakaian.
         </div>
       </div>
     </div>
@@ -178,11 +175,6 @@ const getAssignmentActions = (assignment) => [
 .action-buttons {
   display: flex;
   gap: 8px;
-}
-
-.btn-small {
-  padding: 8px 14px;
-  font-size: 12px;
 }
 
 .btn-danger {
@@ -214,7 +206,7 @@ const getAssignmentActions = (assignment) => [
 
 .dash-table-row {
   display: grid;
-  grid-template-columns: 1fr 0.5fr 0.5fr 0.5fr 1fr 0.5fr;
+  grid-template-columns: 1fr 0.5fr 0.5fr 0.5fr 1fr 0.5fr auto;
   gap: 16px;
   padding: 12px 20px;
   align-items: center;

@@ -17,8 +17,7 @@ const loading = ref(false);
 const employee = ref({
   first_name: "",
   last_name : "",
-  email     : null,
-  is_admin  : false,
+  contact     : null
 });
 
 onMounted(async () => {

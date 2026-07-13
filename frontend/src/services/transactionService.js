@@ -9,5 +9,5 @@ export const getItemHistory = (id) => {
 }
 
 export const withdrawMaterial = (id, itemData) => {
-  return api.get(`/transactions/items/${id}/withdraw`, itemData);
+  return api.post(`/transactions/items/${id}/withdraw`, itemData);
 }

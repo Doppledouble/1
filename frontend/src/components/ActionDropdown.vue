@@ -4,7 +4,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 defineProps({
   actions: {
     type: Array,
-    required: true,
+    required: false,
     // [{ label: 'Assign', handler: fn, variant: 'default' | 'danger' }]
   },
 });

@@ -25,7 +25,11 @@ const router = createRouter({
           name: 'employee-edit',
           component: () => import('../views/Employee/EmployeeEditView.vue')
         },
-
+        {
+          path: 'employees/:id/detail',
+          name: 'employee-detail',
+          component: () => import('../views/Employee/EmployeeDetail.vue')
+        },
         // ITEM ROUTES
         {
           path: 'items',
@@ -68,8 +72,18 @@ const router = createRouter({
         // TRANSACTIONS ROUTES
         {
           path: 'transactions',
+          name: 'transactions-menu',
+          component: () => import('../views/Transaction/TransactionsMenuView.vue')
+        },
+        {
+          path: "transactions/withdraw/create",
+          name: "withdraw-create",
+          component: () => import("../views/transaction/WithdrawCreateView.vue")
+        },
+        { 
+          path: 'transactions/items/:itemId',
           name: 'transactions',
-          component: () => import('../views/Transaction/TransactionsView.vue')
+          component: () => import('../views/transaction/TransactionsView.vue')
         }
       ]
     },

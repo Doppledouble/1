@@ -6,8 +6,7 @@ from typing import Optional
 class EmployeeBase(BaseModel):
     first_name  : str
     last_name   : str
-    email       : Optional[str] = None
-    is_admin    : bool = False
+    contact     : Optional[str] = None
     
 class EmployeeCreate(EmployeeBase):
     pass
@@ -16,14 +15,50 @@ class EmployeeCreate(EmployeeBase):
 class EmployeeUpdate(BaseModel):
     first_name  : Optional[str] = None
     last_name   : Optional[str] = None
-    email       : Optional[str] = None
-    is_admin    : Optional[bool]= None
+    contact     : Optional[str] = None
 
 
-class LocationResponse(EmployeeBase):
+class EmployeeResponse(EmployeeBase):
     id          : int
     created_at  : datetime
-    updated_at  : Optional[datetime]
+    updated_at  : Optional[datetime] = None
     
-    class config:
+    class Config:
         from_attributes = True
+        
+        
+class EmployeeSummaryResponse(EmployeeBase):
+    id                      : int
+    active_tools_count      : int
+    materials_used_count    : int
+    last_activity           : Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+        
+        
+class EmployeeCurrentTool(BaseModel):
+    assignment_id   : int
+    item_id         : int
+    item_name       : str
+    location        : Optional[str] = None
+    quantity        : int
+    assigned_at     : datetime
+    
+    class Config:
+        from_attributes = True
+    
+    
+class EmployeeTransactionItem(BaseModel):
+    transaction_id  : int
+    item_id         : int
+    item_name       : str
+    transaction_type: str
+    location        : Optional[str] = None
+    quantity        : int
+    notes           : Optional[str] = None
+    created_at      : datetime
+    
+    class Config:
+        from_attributes = True
+    

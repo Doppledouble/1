@@ -16,6 +16,10 @@ const editEmployee = (id) => {
   router.push(`/employees/${id}/edit`);
 };
 
+const detailEmployee = (id) =>{
+  router.push(`/employees/${id}/detail`)
+}
+
 const prefetchEmployeeCreate = () => {
   import("./EmployeeCreateView.vue");
 };
@@ -25,7 +29,7 @@ const { filters, result, toggleSort, getSortIcon } = useTableControls(
   [ 
     { key: "first_name", type: "text", resolve: (t) => t.first_name },
     { key: "last_name", type: "text", resolve: (t) => t.last_name },
-    { key: "email", type: "text", resolve: (t) => t.email },
+    { key: "contact", type: "text", resolve: (t) => t.contact },
   ],
   "created_at" // default sort key
 );
@@ -65,7 +69,7 @@ const getEmployeeActions = (employee) => [
 </script>
 
 <template>
-  <section class=" employee-page">
+  <section class="employee-page">
     <!-- HEADER -->
     <div class="section-header">
       <div class="section-tag">
@@ -80,7 +84,7 @@ const getEmployeeActions = (employee) => [
     <!-- SECTION  DASHBOARD -->
     <div class="card dashboard-table-area">
       <div class="dash-table-header">
-        <span>Total Karyawan: {{ employees.length }}</span>
+        <span>Total Karyawan: {{result.length}} / {{ employees.length }}</span>
 
         <button
           class="btn-acid"
@@ -99,10 +103,11 @@ const getEmployeeActions = (employee) => [
           <div class="dash-cell sortable" @click="toggleSort('last_name')">
             Nama Belakang <i :class="['ti', getSortIcon('last_name')]" aria-hidden="true" />
           </div>
-          <div class="dash-cell sortable" @click="toggleSort('email')">
-            E-Mail <i :class="['ti', getSortIcon('email')]" aria-hidden="true" />
+          <div class="dash-cell sortable" @click="toggleSort('contact')">
+            Kontak <i :class="['ti', getSortIcon('contact')]" aria-hidden="true" />
           </div>
           <div class="dash-cell">Aksi</div>
+          <div class="dash-cell">Detail</div>
         </div>
 
         <!-- FILTER ROW -->
@@ -114,8 +119,9 @@ const getEmployeeActions = (employee) => [
             <input v-model="filters.last_name" placeholder="Cari nama belakang..." />
           </div>
           <div class="dash-cell">
-            <input v-model="filters.email" placeholder="Cari email..." />
-          </div>
+            <input v-model="filters.contact" placeholder="Cari kontak..." />
+          </div>         
+          <div class="dash-cell"></div>
         </div>
 
 
@@ -125,9 +131,6 @@ const getEmployeeActions = (employee) => [
           class="dash-table-row"
         >
           <div class="dash-cell dash-cell-name">
-            <div class="dash-cell-icon">
-              {{ employee.first_name?.charAt(0) }}
-            </div>
             {{ employee.first_name }}
           </div>
 
@@ -136,16 +139,21 @@ const getEmployeeActions = (employee) => [
           </div>
 
           <div class="dash-cell">
-            {{ employee.email }}
+            {{ employee.contact }}
           </div>
 
           <div class="dash-cell action-buttons">
               <ActionDropdown :actions="getEmployeeActions(employee)" />
           </div>
+          <div class="dash-cell action-buttons">
+            <button class="btn-small btn-acid" @click="detailEmployee(employee.id)">
+              <span>Detail</span>
+            </button>
+          </div>
         </div>
 
         <div
-          v-if="employees.length === 0"
+          v-if="result.length === 0"
           class="empty-state"
         >
           Belum ada data karyawan.
@@ -167,26 +175,6 @@ const getEmployeeActions = (employee) => [
 
 .dash-table-row{
   gap: 16px;
-}
-
-.btn-small {
-  padding: 8px 14px;
-  font-size: 12px;
-}
-
-.btn-danger {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  background: #ef4444;
-  color: white;
-  transition: transform 0.2s ease;
-}
-
-.btn-danger:hover {
-  transform: translateY(-2px);
 }
 
 .empty-state {

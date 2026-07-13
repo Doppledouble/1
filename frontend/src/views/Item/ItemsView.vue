@@ -17,6 +17,10 @@ const editItem = (id) => {
   router.push(`/items/${id}/edit`);
 };
 
+const historyItem = (id) =>{
+  router.push(`/transactions/items/${id}`)
+}
+
 const assignItem = (itemId) => {
   router.push({ 
     name: 'assignment-create', 
@@ -36,7 +40,7 @@ const { filters, result, toggleSort, getSortIcon } = useTableControls(
     { key: "count", type: "number", resolve: (t) => t.count },
     { key: "unit", type: "text", resolve: (t) => t.unit },
   ],
-  "created_at" // default sort key
+  "created_at"
 );
 
 const loadItems = async () => {
@@ -82,19 +86,33 @@ const deleteItemHandler = async (id) => {
 
   try {
     await deleteItem(id);
-
-    // Refresh data
     await loadItems();
   } catch (error) {
     console.error(error);
   }
 };
 
-const getItemActions = (item) => [
-  { label: "Assign", icon: "ti-link", handler: () => assignItem(item.id) },
-  { label: "Edit", icon: "ti-edit", handler: () => editItem(item.id) },
-  { label: "Hapus", icon: "ti-trash", handler: () => deleteItemHandler(item.id), variant: "danger" },
-];
+const getItemActions = (item) => {
+  const actions = [];
+
+  if (item.type === "material") {
+    actions.push({ label: "Ambil", handler: () => withdrawItem(item.id) });
+  } else {
+    actions.push({ label: "Assign", handler: () => assignItem(item.id) });
+  }
+
+  actions.push({ label: "Edit", handler: () => editItem(item.id) });
+  actions.push({ label: "Hapus", handler: () => deleteItemHandler(item.id), variant: "danger" });
+
+  return actions;
+};
+
+const withdrawItem = (itemId) => {
+  router.push({
+    name: "withdraw-create",
+    query: { item_id: itemId }
+  });
+};
 </script>
 
 <template>
@@ -139,6 +157,7 @@ const getItemActions = (item) => [
             Unit <i :class="['ti', getSortIcon('unit')]" aria-hidden="true" />
           </div>
           <div class="dash-cell">Aksi</div>
+          <div class="dash-cell">History</div>
         </div>
 
         <!-- FILTER ROW -->
@@ -163,9 +182,6 @@ const getItemActions = (item) => [
           class="dash-table-row"
         >
           <div class="dash-cell dash-cell-name">
-            <div class="dash-cell-icon">
-              {{ item.name?.charAt(0) }}
-            </div>
             {{ item.name }}
           </div>
 
@@ -180,9 +196,14 @@ const getItemActions = (item) => [
           <div class="dash-cell">
             {{ item.unit }}
           </div>
-            <div class="dash-cell action-buttons">
+          <div class="dash-cell action-buttons">
               <ActionDropdown :actions="getItemActions(item)" />
-            </div>
+          </div>
+          <div class="dash-cell action-buttons">
+            <button class="btn-small btn-acid" @click="historyItem(item.id)">
+              <span>detail</span>
+            </button>
+          </div>
         </div>
 
         <div
@@ -204,11 +225,6 @@ const getItemActions = (item) => [
 .action-buttons {
   display: flex;
   gap: 8px;
-}
-
-.btn-small {
-  padding: 8px 14px;
-  font-size: 12px;
 }
 
 .btn-danger {
@@ -245,7 +261,9 @@ const getItemActions = (item) => [
         1fr
         1fr
         1fr
-        1fr;
+        1fr
+        0.5fr
+        auto;
     gap: 16px;
     padding: 12px 20px;
     align-items: center;
