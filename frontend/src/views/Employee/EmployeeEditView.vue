@@ -3,7 +3,10 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import EmployeeForm from "../../components/EmployeeForm.vue";
-import { getEmployeeById,updateEmployee } from "../../services/employeeService.js";
+import {
+  getEmployeeById,
+  updateEmployee,
+} from "../../services/employeeService.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -16,8 +19,8 @@ const loading = ref(false);
 
 const employee = ref({
   first_name: "",
-  last_name : "",
-  contact     : null
+  last_name: "",
+  contact: null,
 });
 
 onMounted(async () => {
@@ -52,13 +55,9 @@ const handleCancel = () => {
 <template>
   <section class="container create-page">
     <div class="section-header">
-      <div class="section-tag">
-        Employee Management
-      </div>
+      <div class="section-tag">Employee Management</div>
 
-      <h1 class="section-title">
-        Update Karyawan
-      </h1>
+      <h1 class="section-title">Update Karyawan</h1>
     </div>
 
     <EmployeeForm

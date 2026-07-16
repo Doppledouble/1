@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, reactive, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getItemHistory } from "../../services/transactionService.js";
-import { getItemById } from "../../services/itemService.js"; 
-import { useTableControls } from "../../composables/useTableControls.js";
+import { getItemById } from "../../services/itemService.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -11,7 +10,25 @@ const itemId = computed(() => route.params.itemId);
 
 const item = ref(null);
 const transactions = ref([]);
-const loading = ref(false);
+const loading = ref(true);
+
+const txPage = ref(1);
+const txTotal = ref(0);
+const txTotalPages = ref(1);
+const txPageSize = 10;
+const txLoading = ref(false);
+
+const sortBy = ref("created_at");
+const sortOrder = ref("desc");
+
+const filters = reactive({
+  type: "",
+  quantity: "",
+  employee: "",
+  location: "",
+  notes: "",
+  created_at: "",
+});
 
 const typeLabel = {
   add: "Penambahan",
@@ -19,7 +36,7 @@ const typeLabel = {
   adjustment: "Penyesuaian",
   return: "Pengembalian",
   assignment: "Pemakaian (Tool)",
-  withdraw: "Pemakaian (Material)"
+  withdraw: "Pemakaian (Material)",
 };
 
 const quantityClass = (transaction) => {
@@ -28,40 +45,89 @@ const quantityClass = (transaction) => {
   return "";
 };
 
+const toggleSort = (key) => {
+  if (sortBy.value === key) {
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+  } else {
+    sortBy.value = key;
+    sortOrder.value = "asc";
+  }
+  txPage.value = 1;
+  loadTransactions();
+};
 
-const { filters, result, toggleSort, getSortIcon } = useTableControls(
-  transactions,
-  [
-    { key: "type", type: "text", resolve: (t) => t.transaction_type },
-    { key: "quantity", type: "number", resolve: (t) => t.quantity },
-    { key: "employee", type: "text", resolve: (t) => `${t.employee?.first_name ?? ""} ${t.employee?.last_name ?? ""}` },
-    { key: "location", type: "text", resolve: (t) => t.location ?? "" },
-    { key: "notes", type: "text", resolve: (t) => t.notes ?? "" },
-    { key: "created_at", type: "date", resolve: (t) => new Date(t.created_at) },
-  ],
-  "created_at"
-);
+const getSortIcon = (key) => {
+  if (sortBy.value !== key) return "ti-selector";
+  return sortOrder.value === "asc" ? "ti-chevron-up" : "ti-chevron-down";
+};
 
-const loadData = async () => {
-  loading.value = true;
+const loadTransactions = async () => {
+  txLoading.value = true;
   try {
-    const [transactionRes, itemRes] = await Promise.all([
-      getItemHistory(itemId.value),
-      getItemById(itemId.value)
-    ]);
-    transactions.value = transactionRes.data;
-    item.value = itemRes.data;
+    const res = await getItemHistory(itemId.value, {
+      page: txPage.value,
+      page_size: txPageSize,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value,
+      type: filters.type || undefined,
+      quantity: filters.quantity === "" ? undefined : filters.quantity,
+      employee: filters.employee || undefined,
+      location: filters.location || undefined,
+      notes: filters.notes || undefined,
+      created_at: filters.created_at || undefined,
+    });
+    transactions.value = res.data.items;
+    txTotal.value = res.data.total;
+    txPage.value = res.data.page;
+    txTotalPages.value = res.data.total_pages;
   } catch (error) {
-    console.error(error);
+    console.error("Failed to load transactions", error);
   } finally {
-    loading.value = false;
+    txLoading.value = false;
   }
 };
 
+const loadItem = async () => {
+  try {
+    const res = await getItemById(itemId.value);
+    item.value = res.data;
+  } catch (error) {
+    console.error("Failed to load item", error);
+    item.value = null;
+  }
+};
+
+const goToPage = (page) => {
+  if (
+    txLoading.value ||
+    page < 1 ||
+    page > txTotalPages.value ||
+    page === txPage.value
+  )
+    return;
+  txPage.value = page;
+  loadTransactions();
+};
+
+let filterDebounce = null;
+watch(filters, () => {
+  clearTimeout(filterDebounce);
+  filterDebounce = setTimeout(() => {
+    txPage.value = 1;
+    loadTransactions();
+  }, 400);
+});
+
 watch(
   () => route.params.itemId,
-  loadData,
-  { immediate: true }
+  async () => {
+    Object.keys(filters).forEach((key) => (filters[key] = ""));
+    txPage.value = 1;
+    loading.value = true;
+    await Promise.all([loadItem(), loadTransactions()]);
+    loading.value = false;
+  },
+  { immediate: true },
 );
 
 const goBack = () => {
@@ -83,14 +149,14 @@ const goBack = () => {
       </h1>
       <p v-if="item" class="item-subtitle">
         {{ item.type === "material" ? "Material" : "Alat" }} &middot;
-        {{ item.category || "-" }} &middot;
-        Stok saat ini: {{ item.count }} {{ item.unit }}
+        {{ item.category || "-" }} &middot; Stok saat ini: {{ item.count }}
+        {{ item.unit }}
       </p>
     </div>
 
     <div class="card dashboard-table-area">
       <div class="dash-table-header">
-        <span>Total Transaksi: {{ result.length }}</span>
+        <span>Total Transaksi: {{ txTotal }}</span>
       </div>
 
       <div class="dash-table">
@@ -99,19 +165,24 @@ const goBack = () => {
             Aksi <i :class="['ti', getSortIcon('type')]" aria-hidden="true" />
           </div>
           <div class="dash-cell sortable" @click="toggleSort('quantity')">
-            Jumlah <i :class="['ti', getSortIcon('quantity')]" aria-hidden="true" />
+            Jumlah
+            <i :class="['ti', getSortIcon('quantity')]" aria-hidden="true" />
           </div>
           <div class="dash-cell sortable" @click="toggleSort('employee')">
-            Dilakukan Oleh <i :class="['ti', getSortIcon('employee')]" aria-hidden="true" />
+            Dilakukan Oleh
+            <i :class="['ti', getSortIcon('employee')]" aria-hidden="true" />
           </div>
           <div class="dash-cell sortable" @click="toggleSort('location')">
-            Lokasi <i :class="['ti', getSortIcon('location')]" aria-hidden="true" />
-          </div>          
+            Lokasi
+            <i :class="['ti', getSortIcon('location')]" aria-hidden="true" />
+          </div>
           <div class="dash-cell sortable" @click="toggleSort('notes')">
-            Catatan <i :class="['ti', getSortIcon('notes')]" aria-hidden="true" />
+            Catatan
+            <i :class="['ti', getSortIcon('notes')]" aria-hidden="true" />
           </div>
           <div class="dash-cell sortable" @click="toggleSort('created_at')">
-            Tanggal <i :class="['ti', getSortIcon('created_at')]" aria-hidden="true" />
+            Tanggal
+            <i :class="['ti', getSortIcon('created_at')]" aria-hidden="true" />
           </div>
         </div>
 
@@ -128,14 +199,18 @@ const goBack = () => {
             </select>
           </div>
           <div class="dash-cell">
-            <input v-model="filters.quantity" placeholder="Cari..." type="number" />
+            <input
+              v-model="filters.quantity"
+              placeholder="Cari..."
+              type="number"
+            />
           </div>
           <div class="dash-cell">
             <input v-model="filters.employee" placeholder="Cari karyawan..." />
           </div>
           <div class="dash-cell">
             <input v-model="filters.location" placeholder="Cari lokasi..." />
-          </div>          
+          </div>
           <div class="dash-cell">
             <input v-model="filters.notes" placeholder="Cari catatan..." />
           </div>
@@ -145,10 +220,11 @@ const goBack = () => {
         </div>
 
         <div v-if="loading" class="empty-state">Memuat riwayat...</div>
+        <div v-else-if="!item" class="empty-state">Item tidak ditemukan.</div>
 
         <template v-else>
           <div
-            v-for="transaction in result"
+            v-for="transaction in transactions"
             :key="transaction.id"
             class="dash-table-row"
           >
@@ -159,7 +235,8 @@ const goBack = () => {
             </div>
 
             <div class="dash-cell" :class="quantityClass(transaction)">
-              {{ transaction.quantity > 0 ? "+" : "" }}{{ transaction.quantity }} {{ item.unit }}
+              {{ transaction.quantity > 0 ? "+" : ""
+              }}{{ transaction.quantity }} {{ item.unit }}
             </div>
 
             <div class="dash-cell">
@@ -169,7 +246,7 @@ const goBack = () => {
                   : "—"
               }}
             </div>
-            <div class="dash-cell">{{ transaction.location|| "—" }}</div>
+            <div class="dash-cell">{{ transaction.location || "—" }}</div>
 
             <div class="dash-cell">{{ transaction.notes || "—" }}</div>
 
@@ -178,8 +255,27 @@ const goBack = () => {
             </div>
           </div>
 
-          <div v-if="result.length === 0" class="empty-state">
+          <div v-if="transactions.length === 0" class="empty-state">
             Belum ada riwayat transaksi untuk item ini.
+          </div>
+          <div class="emp-pagination" v-if="txTotalPages > 1">
+            <button
+              class="emp-page-btn"
+              :disabled="txLoading || txPage === 1"
+              @click="goToPage(txPage - 1)"
+            >
+              Sebelumnya
+            </button>
+            <span class="emp-page-info"
+              >Halaman {{ txPage }} dari {{ txTotalPages }}</span
+            >
+            <button
+              class="emp-page-btn"
+              :disabled="txLoading || txPage === txTotalPages"
+              @click="goToPage(txPage + 1)"
+            >
+              Berikutnya
+            </button>
           </div>
         </template>
       </div>
@@ -227,13 +323,37 @@ const goBack = () => {
   font-weight: 600;
 }
 
-.type-badge.add   { background: #E1F5EE; color: #0F6E56; }
-.type-badge.remove     { background: #FEE2E2; color: #991B1B; }
-.type-badge.return     { background: #f2ffee; color: #0da904; }
-.type-badge.assignment { background: #ffffee; color: #c35303; }
-.type-badge.adjustment { background: #EEF2FF; color: #3730A3; }
-.type-badge.withdraw   { background: #ffffee; color: #c35303;}
+.type-badge.add {
+  background: #e1f5ee;
+  color: #0f6e56;
+}
+.type-badge.remove {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.type-badge.return {
+  background: #f2ffee;
+  color: #0da904;
+}
+.type-badge.assignment {
+  background: #ffffee;
+  color: #c35303;
+}
+.type-badge.adjustment {
+  background: #eef2ff;
+  color: #3730a3;
+}
+.type-badge.withdraw {
+  background: #ffffee;
+  color: #c35303;
+}
 
-.qty-positive { color: #0F6E56; font-weight: 600; }
-.qty-negative { color: #991B1B; font-weight: 600; }
+.qty-positive {
+  color: #0f6e56;
+  font-weight: 600;
+}
+.qty-negative {
+  color: #991b1b;
+  font-weight: 600;
+}
 </style>

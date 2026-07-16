@@ -13,18 +13,20 @@ from schemas.assignment import AssignmentCreate, AssignmentUpdate, AssignmentRes
 
 router = APIRouter(prefix="/assignments", tags=["Assignments"])
 
+
 @router.post("/", response_model=AssignmentResponse)
 def create_assignment(data: AssignmentCreate, db: Session = Depends(get_db)):
-    item = db.query(Item).filter(
-        Item.id == data.item_id,
-        Item.is_active == True
-    ).first()
+    item = (
+        db.query(Item).filter(Item.id == data.item_id, Item.is_active == True).first()
+    )
 
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     if item.type != ItemType.TOOL:
-        raise HTTPException(status_code=400, detail="Only tool-type items can be assigned")
+        raise HTTPException(
+            status_code=400, detail="Only tool-type items can be assigned"
+        )
 
     if item.count < data.quantity:
         raise HTTPException(status_code=400, detail="Insufficient stock available")
@@ -36,7 +38,7 @@ def create_assignment(data: AssignmentCreate, db: Session = Depends(get_db)):
         employee_id=data.employee_id,
         location=data.location,
         quantity=data.quantity,
-        notes=data.notes
+        notes=data.notes,
     )
     db.add(assignment)
 
@@ -46,7 +48,7 @@ def create_assignment(data: AssignmentCreate, db: Session = Depends(get_db)):
         transaction_type=TransactionType.ASSIGNMENT,
         employee_id=data.employee_id,
         location=data.location,
-        notes=data.notes
+        notes=data.notes,
     )
     db.add(transaction)
 
@@ -57,23 +59,28 @@ def create_assignment(data: AssignmentCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=list[AssignmentResponse])
-def get_assignments(active: bool | None = Query(None, description="Filter by active status"), db: Session = Depends(get_db)):
+def get_assignments(
+    active: bool | None = Query(None, description="Filter by active status"),
+    db: Session = Depends(get_db),
+):
     query = db.query(Assignment).options(
-        joinedload(Assignment.item),
-        joinedload(Assignment.employee)
+        joinedload(Assignment.item), joinedload(Assignment.employee)
     )
     if active is not None:
-        query = query.filter(Assignment.returned_at.is_(None) if active else Assignment.returned_at.isnot(None))
+        query = query.filter(
+            Assignment.returned_at.is_(None)
+            if active
+            else Assignment.returned_at.isnot(None)
+        )
 
     return query.all()
 
 
 @router.get("/{assignment_id}", response_model=AssignmentResponse)
 def get_assignment(assignment_id: int, db: Session = Depends(get_db)):
-    assignment = (db.query(Assignment)
-        .options(
-            joinedload(Assignment.item), 
-            joinedload(Assignment.employee))
+    assignment = (
+        db.query(Assignment)
+        .options(joinedload(Assignment.item), joinedload(Assignment.employee))
         .filter(Assignment.id == assignment_id)
         .first()
     )
@@ -85,7 +92,9 @@ def get_assignment(assignment_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/{assignment_id}", response_model=AssignmentResponse)
-def update_assignment(assignment_id: int, data: AssignmentUpdate, db: Session = Depends(get_db)):
+def update_assignment(
+    assignment_id: int, data: AssignmentUpdate, db: Session = Depends(get_db)
+):
     assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
 
     if not assignment:
@@ -106,7 +115,9 @@ def update_assignment(assignment_id: int, data: AssignmentUpdate, db: Session = 
         difference = new_quantity - assignment.quantity
 
         if difference > 0 and item.count < difference:
-            raise HTTPException(status_code=400, detail="Insufficient stock for this adjustment")
+            raise HTTPException(
+                status_code=400, detail="Insufficient stock for this adjustment"
+            )
 
         item.count -= difference
         assignment.quantity = new_quantity
@@ -117,7 +128,7 @@ def update_assignment(assignment_id: int, data: AssignmentUpdate, db: Session = 
             transaction_type=TransactionType.ADJUSTMENT,
             employee_id=assignment.employee_id,
             location=assignment.location,
-            notes=f"Penyesuaian jumlah assignment #{assignment.id}"
+            notes=f"Penyesuaian jumlah assignment #{assignment.id}",
         )
         db.add(transaction)
 
@@ -141,7 +152,7 @@ def delete_assignment(assignment_id: int, db: Session = Depends(get_db)):
         db.commit()
     else:
         raise HTTPException(status_code=404, detail="Assignment not found")
-        
+
     return {"message": f"Assignment with id {assignment_id} successfuly deleted"}
 
 
@@ -166,7 +177,7 @@ def return_assignment(assignment_id: int, db: Session = Depends(get_db)):
         transaction_type=TransactionType.RETURN,
         employee_id=assignment.employee_id,
         location=assignment.location,
-        notes="Barang dikembalikan"
+        notes="Barang dikembalikan",
     )
     db.add(transaction)
 

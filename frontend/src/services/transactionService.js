@@ -4,8 +4,8 @@ export const getTransactions = () => {
   return api.get("/transactions");
 };
 
-export const getItemHistory = (id) => {
-  return api.get(`/transactions/items/${id}/history`);
+export const getItemHistory = (itemId, params = {}) => {
+  return api.get(`/transactions/items/${itemId}/history` , { params });
 }
 
 export const withdrawMaterial = (id, itemData) => {

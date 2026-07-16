@@ -15,7 +15,7 @@ class Assignment(Base):
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
     location    = Column(String, nullable=True)
     
-    quantity = Column(Integer, nullable=False, default=1)
+    quantity    = Column(Integer, nullable=False, default=1)
     notes       = Column(String, nullable=True)
     
     assigned_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

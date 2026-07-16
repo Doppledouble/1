@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import ItemForm from "../../components/ItemForm.vue";
-import { getItemById,updateItem } from "../../services/itemService.js";
+import { getItemById, updateItem } from "../../services/itemService.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -15,11 +15,11 @@ console.log("itemId:", itemId);
 const loading = ref(false);
 
 const item = ref({
-  name    : "",
+  name: "",
   category: "",
-  type    : "",
-  count   : 0,
-  unit    : "",
+  type: "",
+  count: 0,
+  unit: "",
 });
 
 onMounted(async () => {
@@ -54,13 +54,9 @@ const handleCancel = () => {
 <template>
   <section class="container create-page">
     <div class="section-header">
-      <div class="section-tag">
-        Employee Management
-      </div>
+      <div class="section-tag">Employee Management</div>
 
-      <h1 class="section-title">
-        Update Barang
-      </h1>
+      <h1 class="section-title">Update Barang</h1>
     </div>
 
     <ItemForm

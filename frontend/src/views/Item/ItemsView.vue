@@ -1,12 +1,18 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getItems, getTools, getMaterials, deleteItem } from "../../services/itemService.js";
+import {
+  getItems,
+  getTools,
+  getMaterials,
+  deleteItem,
+} from "../../services/itemService.js";
 import { useTableControls } from "../../composables/useTableControls.js";
+import { useInfiniteScroll } from "../../composables/useInfiniteScroll.js";
 import ActionDropdown from "../../components/ActionDropdown.vue";
 
 const router = useRouter();
-const route  = useRoute()
+const route = useRoute();
 const items = ref([]);
 
 const addItem = () => {
@@ -17,31 +23,33 @@ const editItem = (id) => {
   router.push(`/items/${id}/edit`);
 };
 
-const historyItem = (id) =>{
-  router.push(`/transactions/items/${id}`)
-}
+const historyItem = (id) => {
+  router.push(`/transactions/items/${id}`);
+};
 
 const assignItem = (itemId) => {
-  router.push({ 
-    name: 'assignment-create', 
-    query: { item_id: itemId }  
-  })
-}
+  router.push({
+    name: "assignment-create",
+    query: { item_id: itemId },
+  });
+};
 
 const prefetchItemCreate = () => {
   import("./ItemCreateView.vue");
 };
 
 const { filters, result, toggleSort, getSortIcon } = useTableControls(
-  items, 
-  [ 
+  items,
+  [
     { key: "name", type: "text", resolve: (t) => t.name },
     { key: "category", type: "text", resolve: (t) => t.category },
     { key: "count", type: "number", resolve: (t) => t.count },
     { key: "unit", type: "text", resolve: (t) => t.unit },
   ],
-  "created_at"
+  "created_at",
 );
+
+const { visibleData, hasMore, setSentinel } = useInfiniteScroll(result, 10);
 
 const loadItems = async () => {
   try {
@@ -67,7 +75,7 @@ watch(
   () => route.path,
   () => {
     loadItems();
-  }
+  },
 );
 
 const pageTitle = computed(() => {
@@ -76,11 +84,8 @@ const pageTitle = computed(() => {
   return "Daftar Barang";
 });
 
-
 const deleteItemHandler = async (id) => {
-  const confirmed = confirm(
-    "Yakin ingin menghapus barang ini?"
-  );
+  const confirmed = confirm("Yakin ingin menghapus barang ini?");
 
   if (!confirmed) return;
 
@@ -102,7 +107,11 @@ const getItemActions = (item) => {
   }
 
   actions.push({ label: "Edit", handler: () => editItem(item.id) });
-  actions.push({ label: "Hapus", handler: () => deleteItemHandler(item.id), variant: "danger" });
+  actions.push({
+    label: "Hapus",
+    handler: () => deleteItemHandler(item.id),
+    variant: "danger",
+  });
 
   return actions;
 };
@@ -110,7 +119,7 @@ const getItemActions = (item) => {
 const withdrawItem = (itemId) => {
   router.push({
     name: "withdraw-create",
-    query: { item_id: itemId }
+    query: { item_id: itemId },
   });
 };
 </script>
@@ -119,15 +128,13 @@ const withdrawItem = (itemId) => {
   <section class="item-page">
     <!-- HEADER -->
     <div class="section-header">
-      <div class="section-tag">
-        Employee Management
-      </div>
+      <div class="section-tag">Employee Management</div>
 
       <h1 class="section-title">
         {{ pageTitle }}
       </h1>
     </div>
-    
+
     <!-- SECTION 1 : DASHBOARD -->
     <div class="card dashboard-table-area">
       <div class="dash-table-header">
@@ -141,46 +148,53 @@ const withdrawItem = (itemId) => {
           + Tambah Barang
         </button>
       </div>
-      
+
       <div class="dash-table">
-        <div class="dash-table-row head">
-          <div class="dash-cell sortable" @click="toggleSort('name')">
-            Nama <i :class="['ti', getSortIcon('name')]" aria-hidden="true" />
+        <div class="dash-table-sticky-header">
+          <div class="dash-table-row head">
+            <div class="dash-cell sortable" @click="toggleSort('name')">
+              Nama <i :class="['ti', getSortIcon('name')]" aria-hidden="true" />
+            </div>
+            <div class="dash-cell sortable" @click="toggleSort('category')">
+              Kategori
+              <i :class="['ti', getSortIcon('category')]" aria-hidden="true" />
+            </div>
+            <div class="dash-cell sortable" @click="toggleSort('count')">
+              Jumlah
+              <i :class="['ti', getSortIcon('count')]" aria-hidden="true" />
+            </div>
+            <div class="dash-cell sortable" @click="toggleSort('unit')">
+              Unit <i :class="['ti', getSortIcon('unit')]" aria-hidden="true" />
+            </div>
+            <div class="dash-cell">Aksi</div>
+            <div class="dash-cell">History</div>
           </div>
-          <div class="dash-cell sortable" @click="toggleSort('category')">
-            Kategori <i :class="['ti', getSortIcon('category')]" aria-hidden="true" />
+
+          <!-- FILTER ROW -->
+          <div class="dash-table-row filter-row">
+            <div class="dash-cell">
+              <input v-model="filters.name" placeholder="Cari barang..." />
+            </div>
+            <div class="dash-cell">
+              <input
+                v-model="filters.category"
+                placeholder="Cari kategori..."
+              />
+            </div>
+            <div class="dash-cell">
+              <input
+                v-model="filters.count"
+                placeholder="Cari jumlah..."
+                type="number"
+              />
+            </div>
+            <div class="dash-cell">
+              <input v-model="filters.unit" placeholder="Cari satuan..." />
+            </div>
           </div>
-          <div class="dash-cell sortable" @click="toggleSort('count')">
-            Jumlah <i :class="['ti', getSortIcon('count')]" aria-hidden="true" />
-          </div>
-          <div class="dash-cell sortable" @click="toggleSort('unit')">
-            Unit <i :class="['ti', getSortIcon('unit')]" aria-hidden="true" />
-          </div>
-          <div class="dash-cell">Aksi</div>
-          <div class="dash-cell">History</div>
         </div>
 
-        <!-- FILTER ROW -->
-        <div class="dash-table-row filter-row">
-          <div class="dash-cell">
-            <input v-model="filters.name" placeholder="Cari barang..." />
-          </div>
-          <div class="dash-cell">
-            <input v-model="filters.category" placeholder="Cari kategori..." />
-          </div>
-          <div class="dash-cell">
-            <input v-model="filters.count" placeholder="Cari jumlah..." type="number"/>
-          </div>
-          <div class="dash-cell">
-            <input v-model="filters.unit" placeholder="Cari satuan..."/>
-          </div>          
-        </div>
-
-        <div
-          v-for="item in result"
-          :key="item.id"
-          class="dash-table-row"
-        >
+        <div v-for="item in visibleData" :key="item.id" class="dash-table-row">
           <div class="dash-cell dash-cell-name">
             {{ item.name }}
           </div>
@@ -197,7 +211,7 @@ const withdrawItem = (itemId) => {
             {{ item.unit }}
           </div>
           <div class="dash-cell action-buttons">
-              <ActionDropdown :actions="getItemActions(item)" />
+            <ActionDropdown :actions="getItemActions(item)" />
           </div>
           <div class="dash-cell action-buttons">
             <button class="btn-small btn-acid" @click="historyItem(item.id)">
@@ -206,11 +220,11 @@ const withdrawItem = (itemId) => {
           </div>
         </div>
 
-        <div
-          v-if="items.length === 0"
-          class="empty-state"
-        >
+        <div v-if="items.length === 0" class="empty-state">
           Belum ada data barang.
+        </div>
+        <div v-if="hasMore" :ref="setSentinel" class="scroll-sentinel">
+          Memuat lebih banyak...
         </div>
       </div>
     </div>
@@ -255,20 +269,19 @@ const withdrawItem = (itemId) => {
 }
 
 .dash-table-row {
-    display: grid;
-    grid-template-columns:
-        1fr
-        1fr
-        1fr
-        1fr
-        1fr
-        0.5fr
-        auto;
-    gap: 16px;
-    padding: 12px 20px;
-    align-items: center;
-    border-bottom: 1px solid var(--border-light);
-    font-size: 13px;
+  display: grid;
+  grid-template-columns:
+    1fr
+    1fr
+    1fr
+    1fr
+    1fr
+    0.5fr;
+  gap: 16px;
+  padding: 12px 20px;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
 }
 
 .dash-table-row .dash-cell:not(:first-child) {

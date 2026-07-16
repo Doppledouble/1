@@ -1,7 +1,11 @@
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getItems, getTools, getMaterials } from "../../services/itemService.js";
+import {
+  getItems,
+  getTools,
+  getMaterials,
+} from "../../services/itemService.js";
 
 const router = useRouter();
 const route = useRoute();
@@ -27,10 +31,7 @@ const loadItems = async () => {
 
 onMounted(loadItems);
 
-watch(
-  () => route.path,
-  loadItems
-);
+watch(() => route.path, loadItems);
 
 const pageTitle = computed(() => {
   if (route.path === "/items/tools") return "Daftar Tools";
@@ -94,7 +95,7 @@ const goToTransactionPage = (itemId) => {
 
 .item-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .item-icon {

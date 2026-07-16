@@ -30,13 +30,9 @@ const handleCancel = () => {
 <template>
   <section class="container create-page">
     <div class="section-header">
-      <div class="section-tag">
-        Employee Management
-      </div>
+      <div class="section-tag">Employee Management</div>
 
-      <h1 class="section-title">
-        Tambah Karyawan
-      </h1>
+      <h1 class="section-title">Tambah Karyawan</h1>
     </div>
 
     <EmployeeForm

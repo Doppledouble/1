@@ -5,15 +5,15 @@ import { useRouter, useRoute } from "vue-router";
 import AssignmentForm from "../../components/AssignmentForm.vue";
 
 const router = useRouter();
-const route  = useRoute();
+const route = useRoute();
 
 const initialData = {
   item_id: route.query.item_id ? parseInt(route.query.item_id) : null,
   employee_id: null,
   location: null,
   quantity: 1,
-  notes: ""
-}
+  notes: "",
+};
 
 const loading = ref(false);
 
@@ -39,13 +39,9 @@ const handleCancel = () => {
 <template>
   <section class="container create-page">
     <div class="section-header">
-      <div class="section-tag">
-        Employee Management
-      </div>
+      <div class="section-tag">Employee Management</div>
 
-      <h1 class="section-title">
-        Assign Barang
-      </h1>
+      <h1 class="section-title">Assign Barang</h1>
     </div>
 
     <AssignmentForm

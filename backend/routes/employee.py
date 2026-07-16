@@ -2,18 +2,28 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
+
 from models.employee import Employee
 from models.assignment import Assignment
 from models.transaction import Transaction
 from models.enums import TransactionType
-from schemas.employee import EmployeeCreate, EmployeeUpdate, EmployeeSummaryResponse, EmployeeCurrentTool, EmployeeTransactionItem
+
+from schemas.employee import (
+    EmployeeCreate,
+    EmployeeUpdate,
+    EmployeeSummaryResponse,
+    EmployeeCurrentTool,
+    EmployeeTransactionItem,
+)
 from schemas.pagination import Page
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
+
 @router.get("/")
-def get_employees(db:Session = Depends(get_db)):
+def get_employees(db: Session = Depends(get_db)):
     return db.query(Employee).all()
+
 
 @router.get("/{employee_id}/summary", response_model=EmployeeSummaryResponse)
 def get_employee_summary(employee_id: int, db: Session = Depends(get_db)):
@@ -31,7 +41,7 @@ def get_employee_summary(employee_id: int, db: Session = Depends(get_db)):
         db.query(Transaction)
         .filter(
             Transaction.employee_id == employee_id,
-            Transaction.transaction_type == TransactionType.WITHDRAW
+            Transaction.transaction_type == TransactionType.WITHDRAW,
         )
         .count()
     )
@@ -50,7 +60,7 @@ def get_employee_summary(employee_id: int, db: Session = Depends(get_db)):
         contact=employee.contact,
         active_tools_count=active_tools_count,
         materials_used_count=materials_used_count,
-        last_activity=last_transaction.created_at if last_transaction else None
+        last_activity=last_transaction.created_at if last_transaction else None,
     )
 
 
@@ -70,7 +80,7 @@ def get_employee_current_tools(employee_id: int, db: Session = Depends(get_db)):
             item_name=a.item.name,
             location=a.location,
             quantity=a.quantity,
-            assigned_at=a.assigned_at
+            assigned_at=a.assigned_at,
         )
         for a in assignments
     ]
@@ -81,7 +91,7 @@ def get_employee_transactions(
     employee_id: int,
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     base_query = (
         db.query(Transaction)
@@ -92,12 +102,7 @@ def get_employee_transactions(
 
     total = base_query.count()
 
-    transactions = (
-        base_query
-        .offset((page - 1) * page_size)
-        .limit(page_size)
-        .all()
-    )
+    transactions = base_query.offset((page - 1) * page_size).limit(page_size).all()
 
     items = [
         EmployeeTransactionItem(
@@ -108,19 +113,16 @@ def get_employee_transactions(
             transaction_type=t.transaction_type.value,
             location=t.location,
             notes=t.notes,
-            created_at=t.created_at
+            created_at=t.created_at,
         )
         for t in transactions
     ]
 
     return Page[EmployeeTransactionItem].create(
-        items=items,
-        total=total,
-        page=page,
-        page_size=page_size
+        items=items, total=total, page=page, page_size=page_size
     )
-    
-    
+
+
 @router.get("/{employee_id}")
 def get_employee(employee_id: int, db: Session = Depends(get_db)):
     employee = db.query(Employee).filter(Employee.id == employee_id).first()
@@ -134,20 +136,22 @@ def get_employee(employee_id: int, db: Session = Depends(get_db)):
 @router.post("/")
 def create_employee(employee: EmployeeCreate, db: Session = Depends(get_db)):
     new_employee = Employee(
-        first_name  = employee.first_name,
-        last_name   = employee.last_name,
-        contact     = employee.contact
+        first_name=employee.first_name,
+        last_name=employee.last_name,
+        contact=employee.contact,
     )
-    
+
     db.add(new_employee)
     db.commit()
     db.refresh(new_employee)
-    
+
     return new_employee
 
 
 @router.patch("/{employee_id}")
-def update_employee(employee_id: int, employee_data: EmployeeUpdate, db: Session = Depends(get_db)):
+def update_employee(
+    employee_id: int, employee_data: EmployeeUpdate, db: Session = Depends(get_db)
+):
     employee = db.query(Employee).filter(Employee.id == employee_id).first()
 
     if not employee:
@@ -173,5 +177,5 @@ def delete_employee(employee_id: int, db: Session = Depends(get_db)):
         db.commit()
     else:
         raise HTTPException(status_code=404, detail="Employee not found")
-        
+
     return {"message": f"Employee with id {employee_id} successfuly deleted"}
