@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch } from "vue";  // ← removed unused onMounted
+import { ref, watch } from "vue";  
+import DateTimePicker from "./DateTimePicker.vue";
 
 const props = defineProps({
   initialData: {
@@ -99,7 +100,10 @@ const submitForm = () => {
 
       <div class="form-group" v-if="!isEdit">
         <label>Tanggal Ditambahkan ke Inventori</label>
-        <input v-model="form.inventory_date" type="datetime-local" />
+        <DateTimePicker
+          v-model="form.inventory_date"
+          placeholder="Pilih tanggal & waktu"
+        />
         <small style="color: var(--text-muted)">
           Kosongkan jika hari ini
         </small>

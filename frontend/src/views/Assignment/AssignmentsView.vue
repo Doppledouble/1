@@ -1,16 +1,20 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import {
   getActiveAssignments,
   returnAssignment,
 } from "../../services/assignmentService.js";
 import { useTableControls } from "../../composables/useTableControls.js";
 import { useRouter } from "vue-router";
-import ActionDropdown from "../../components/ActionDropdown.vue";
 import { useInfiniteScroll } from "../../composables/useInfiniteScroll.js";
+import { formatDate } from "../../utils/formatDate.js";
+import ActionDropdown from "../../components/ActionDropdown.vue";
+import DateRangeFilter from "../../components/DateRangeFilter.vue";
+
 
 const router = useRouter();
 const assignments = ref([]);
+const dateRange = ref({ start: null, end: null });
 
 const addAssignment = () => {
   router.push("/assignments/create");
@@ -20,7 +24,7 @@ const editAssignment = (id) => {
   router.push(`/assignments/${id}/edit`);
 };
 
-const { filters, result, toggleSort, getSortIcon } = useTableControls(
+const { filters, result:baseResult, toggleSort, getSortIcon } = useTableControls(
   // this is the whole transaction data
   assignments,
   [
@@ -42,6 +46,18 @@ const { filters, result, toggleSort, getSortIcon } = useTableControls(
   ],
   "assigned_at", // default sort key
 );
+
+const result = computed(() => {
+  if (!dateRange.value.start || !dateRange.value.end) return baseResult.value;
+
+  const startTime = new Date(dateRange.value.start).setHours(0, 0, 0, 0);
+  const endTime = new Date(dateRange.value.end).setHours(23, 59, 59, 999);
+
+  return baseResult.value.filter((a) => {
+    const t = new Date(a.assigned_at).getTime();
+    return t >= startTime && t <= endTime;
+  });
+});
 
 const { visibleData, hasMore, setSentinel } = useInfiniteScroll(result, 10);
 
@@ -93,7 +109,7 @@ const getAssignmentActions = (assignment) => [
     <!-- SECTION  DASHBOARD -->
     <div class="card dashboard-table-area">
       <div class="dash-table-header">
-        <span>Total Pemakaian: {{ assignments.length }}</span>
+        <span>Total Pemakaian: {{ result.length }} / {{ assignments.length }}</span>
 
         <button class="btn-acid" @click="addAssignment">
           + Tambah Pemakaian
@@ -107,26 +123,26 @@ const getAssignmentActions = (assignment) => [
               Nama Barang
               <i :class="['ti', getSortIcon('item')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('employee')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('employee')">
               PIC
               <i :class="['ti', getSortIcon('employee')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('quantity')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('quantity')">
               Jumlah
               <i :class="['ti', getSortIcon('quantity')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('location')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('location')">
               Lokasi
               <i :class="['ti', getSortIcon('location')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('assigned_at')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('assigned_at')">
               Tanggal Dipakai
               <i
                 :class="['ti', getSortIcon('assigned_at')]"
                 aria-hidden="true"
               />
             </div>
-            <div class="dash-cell">Aksi</div>
+            <div class="dash-cell row-center">Aksi</div>
           </div>
 
           <!-- FILTER ROW -->
@@ -134,24 +150,21 @@ const getAssignmentActions = (assignment) => [
             <div class="dash-cell">
               <input v-model="filters.item" placeholder="Cari barang..." />
             </div>
-            <div class="dash-cell">
+            <div class="dash-cell row-center">
               <input v-model="filters.employee" placeholder="Cari PIC..." />
             </div>
-            <div class="dash-cell">
+            <div class="dash-cell row-center">
               <input
                 v-model="filters.count"
                 placeholder="Cari jumlah..."
                 type="number"
               />
             </div>
-            <div class="dash-cell">
+            <div class="dash-cell row-center">
               <input v-model="filters.location" placeholder="Cari lokasi..." />
             </div>
-            <div class="dash-cell">
-              <input
-                v-model="filters.assigned_at"
-                placeholder="Cari tanggal..."
-              />
+            <div class="dash-cell row-center">
+              <DateRangeFilter v-model="dateRange" placeholder="Filter tanggal assign..." />
             </div>
           </div>
         </div>
@@ -165,24 +178,24 @@ const getAssignmentActions = (assignment) => [
             {{ assignment.item?.name }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ assignment.employee?.first_name }}
             {{ assignment.employee?.last_name }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ assignment.quantity }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ assignment.location }}
           </div>
 
-          <div class="dash-cell">
-            {{ new Date(assignment.assigned_at).toLocaleDateString() }}
+          <div class="dash-cell row-center">
+            {{ formatDate(assignment.assigned_at) }}
           </div>
 
-          <div class="dash-cell action-buttons">
+          <div class="dash-cell row-center action-buttons">
             <ActionDropdown :actions="getAssignmentActions(assignment)" />
           </div>
         </div>
@@ -243,12 +256,5 @@ const getAssignmentActions = (assignment) => [
   align-items: center;
   border-bottom: 1px solid var(--border-light);
   font-size: 13px;
-}
-
-.dash-table-row .dash-cell:not(:first-child) {
-  text-align: center;
-  justify-content: center;
-  display: flex;
-  align-items: center;
 }
 </style>

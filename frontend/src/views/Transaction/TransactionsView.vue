@@ -3,6 +3,8 @@ import { ref, reactive, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getItemHistory } from "../../services/transactionService.js";
 import { getItemById } from "../../services/itemService.js";
+import { formatDate } from "../../utils/formatDate.js";
+
 
 const route = useRoute();
 const router = useRouter();
@@ -251,7 +253,7 @@ const goBack = () => {
             <div class="dash-cell">{{ transaction.notes || "—" }}</div>
 
             <div class="dash-cell">
-              {{ new Date(transaction.created_at).toLocaleDateString() }}
+              {{ formatDate(transaction.created_at) }}
             </div>
           </div>
 
@@ -323,35 +325,11 @@ const goBack = () => {
   font-weight: 600;
 }
 
-.type-badge.add {
-  background: #e1f5ee;
-  color: #0f6e56;
-}
-.type-badge.remove {
-  background: #fee2e2;
-  color: #991b1b;
-}
-.type-badge.return {
-  background: #f2ffee;
-  color: #0da904;
-}
-.type-badge.assignment {
-  background: #ffffee;
-  color: #c35303;
-}
-.type-badge.adjustment {
-  background: #eef2ff;
-  color: #3730a3;
-}
-.type-badge.withdraw {
-  background: #ffffee;
-  color: #c35303;
-}
-
 .qty-positive {
   color: #0f6e56;
   font-weight: 600;
 }
+
 .qty-negative {
   color: #991b1b;
   font-weight: 600;

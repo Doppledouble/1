@@ -39,6 +39,7 @@ def create_assignment(data: AssignmentCreate, db: Session = Depends(get_db)):
         location=data.location,
         quantity=data.quantity,
         notes=data.notes,
+        assigned_at=data.assigned_at or datetime.now(timezone.utc)
     )
     db.add(assignment)
 
@@ -49,6 +50,7 @@ def create_assignment(data: AssignmentCreate, db: Session = Depends(get_db)):
         employee_id=data.employee_id,
         location=data.location,
         notes=data.notes,
+        assigned_at=data.assigned_at or datetime.now(timezone.utc)
     )
     db.add(transaction)
 

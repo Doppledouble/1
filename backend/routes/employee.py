@@ -31,9 +31,9 @@ def get_employee_summary(employee_id: int, db: Session = Depends(get_db)):
     if not employee:
         raise HTTPException(status_code=404, detail="Employee not found")
 
-    active_tools_count = (
+    tools_used_count = (
         db.query(Assignment)
-        .filter(Assignment.employee_id == employee_id, Assignment.returned_at.is_(None))
+        .filter(Assignment.employee_id == employee_id)
         .count()
     )
 
@@ -58,7 +58,7 @@ def get_employee_summary(employee_id: int, db: Session = Depends(get_db)):
         first_name=employee.first_name,
         last_name=employee.last_name,
         contact=employee.contact,
-        active_tools_count=active_tools_count,
+        tools_used_count=tools_used_count,
         materials_used_count=materials_used_count,
         last_activity=last_transaction.created_at if last_transaction else None,
     )

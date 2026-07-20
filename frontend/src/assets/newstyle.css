@@ -531,7 +531,7 @@ img {
   background: rgba(0, 0, 0, 0.015);
 }
 
-.dash-table-row .dash-cell:not(:first-child) {
+.row-center {
   text-align: center;
   justify-content: center;
   display: flex;
@@ -1661,4 +1661,34 @@ img {
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.type-badge.add {
+  background: #e1f5ee;
+  color: #0f6e56;
+}
+
+.type-badge.remove {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.type-badge.return {
+  background: #f2ffee;
+  color: #0da904;
+}
+
+.type-badge.assignment {
+  background: #ffffee;
+  color: #c35303;
+}
+
+.type-badge.adjustment {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.type-badge.withdraw {
+  background: #ffffee;
+  color: #c35303;
 }

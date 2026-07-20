@@ -138,7 +138,7 @@ const withdrawItem = (itemId) => {
     <!-- SECTION 1 : DASHBOARD -->
     <div class="card dashboard-table-area">
       <div class="dash-table-header">
-        <span>Total Barang: {{ items.length }}</span>
+        <span>Total Barang: {{ result.length }} / {{ items.length }}</span>
 
         <button
           class="btn-acid"
@@ -155,19 +155,19 @@ const withdrawItem = (itemId) => {
             <div class="dash-cell sortable" @click="toggleSort('name')">
               Nama <i :class="['ti', getSortIcon('name')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('category')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('category')">
               Kategori
               <i :class="['ti', getSortIcon('category')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('count')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('count')">
               Jumlah
               <i :class="['ti', getSortIcon('count')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('unit')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('unit')">
               Unit <i :class="['ti', getSortIcon('unit')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell">Aksi</div>
-            <div class="dash-cell">History</div>
+            <div class="dash-cell row-center">Aksi</div>
+            <div class="dash-cell row-center">History</div>
           </div>
 
           <!-- FILTER ROW -->
@@ -199,22 +199,22 @@ const withdrawItem = (itemId) => {
             {{ item.name }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ item.category }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ item.count }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ item.unit }}
           </div>
-          <div class="dash-cell action-buttons">
+          <div class="dash-cell action-buttons row-center">
             <ActionDropdown :actions="getItemActions(item)" />
           </div>
-          <div class="dash-cell action-buttons">
-            <button class="btn-small btn-acid" @click="historyItem(item.id)">
+          <div class="dash-cell action-buttons row-center">
+            <button class="btn-small btn-acid row-center" @click="historyItem(item.id)">
               <span>detail</span>
             </button>
           </div>
@@ -282,12 +282,5 @@ const withdrawItem = (itemId) => {
   align-items: center;
   border-bottom: 1px solid var(--border-light);
   font-size: 13px;
-}
-
-.dash-table-row .dash-cell:not(:first-child) {
-  text-align: center;
-  justify-content: center;
-  display: flex;
-  align-items: center;
 }
 </style>

@@ -6,6 +6,7 @@ import {
   getEmployeeCurrentTools,
   getEmployeeTransactions,
 } from "../../services/employeeService.js";
+import { formatDate } from "../../utils/formatDate.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +22,15 @@ const txLoading = ref(false);
 const txPage = ref(1);
 const txTotalPages = ref(1);
 const txPageSize = 10;
+
+const typeLabel = {
+  add: "Penambahan",
+  remove: "Pengurangan",
+  adjustment: "Penyesuaian",
+  return: "Pengembalian",
+  assignment: "Pemakaian (Tool)",
+  withdraw: "Pemakaian (Material)",
+};
 
 const loadTransactions = async (page = 1) => {
   txLoading.value = true;
@@ -73,17 +83,6 @@ onMounted(async () => {
     loading.value = false;
   }
 });
-
-const formatDate = (value) => {
-  if (!value) return "-";
-  return new Date(value).toLocaleString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const statusClass = (type) => {
   const map = {
@@ -143,7 +142,7 @@ const goBack = () => router.back();
       <div class="emp-stats-grid">
         <div class="dash-stat-card">
           <div class="dash-stat-label">Alat Digunakan</div>
-          <div class="dash-stat-value">{{ summary.active_tools_count }}</div>
+          <div class="dash-stat-value">{{ summary.tools_used_count }}</div>
         </div>
         <div class="dash-stat-card">
           <div class="dash-stat-label">Material Digunakan</div>
@@ -205,11 +204,8 @@ const goBack = () => router.back();
             <div>{{ formatDate(tx.created_at) }}</div>
             <div class="dash-cell-name">{{ tx.item_name }}</div>
             <div>
-              <span
-                class="dash-status"
-                :class="statusClass(tx.transaction_type)"
-              >
-                {{ tx.transaction_type }}
+              <span :class="['type-badge', tx.transaction_type]">
+                {{ typeLabel[tx.transaction_type] }}
               </span>
             </div>
             <div>{{ tx.quantity }}</div>

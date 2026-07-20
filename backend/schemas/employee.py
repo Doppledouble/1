@@ -29,7 +29,7 @@ class EmployeeResponse(EmployeeBase):
         
 class EmployeeSummaryResponse(EmployeeBase):
     id                      : int
-    active_tools_count      : int
+    tools_used_count        : int
     materials_used_count    : int
     last_activity           : Optional[datetime] = None
 

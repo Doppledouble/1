@@ -9,6 +9,7 @@ class AssignmentBase(BaseModel):
     location: Optional[str] = None
     quantity: int
     notes: Optional[str] = None
+    assigned_at: Optional[datetime] = None
 
 
 class AssignmentCreate(AssignmentBase):

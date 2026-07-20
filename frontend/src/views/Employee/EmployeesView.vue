@@ -112,16 +112,16 @@ const getEmployeeActions = (employee) => [
                 aria-hidden="true"
               />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('last_name')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('last_name')">
               Nama Belakang
               <i :class="['ti', getSortIcon('last_name')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell sortable" @click="toggleSort('contact')">
+            <div class="dash-cell sortable row-center" @click="toggleSort('contact')">
               Kontak
               <i :class="['ti', getSortIcon('contact')]" aria-hidden="true" />
             </div>
-            <div class="dash-cell">Aksi</div>
-            <div class="dash-cell">Detail</div>
+            <div class="dash-cell row-center">Aksi</div>
+            <div class="dash-cell row-center">Detail</div>
           </div>
 
           <!-- FILTER ROW -->
@@ -132,16 +132,16 @@ const getEmployeeActions = (employee) => [
                 placeholder="Cari nama depan..."
               />
             </div>
-            <div class="dash-cell">
+            <div class="dash-cell row-center">
               <input
                 v-model="filters.last_name"
                 placeholder="Cari nama belakang..."
               />
             </div>
-            <div class="dash-cell">
+            <div class="dash-cell row-center">
               <input v-model="filters.contact" placeholder="Cari kontak..." />
             </div>
-            <div class="dash-cell"></div>
+            <div class="dash-cell row-center"></div>
           </div>
         </div>
 
@@ -154,18 +154,18 @@ const getEmployeeActions = (employee) => [
             {{ employee.first_name }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ employee.last_name }}
           </div>
 
-          <div class="dash-cell">
+          <div class="dash-cell row-center">
             {{ employee.contact }}
           </div>
 
-          <div class="dash-cell action-buttons">
+          <div class="dash-cell row-center action-buttons">
             <ActionDropdown :actions="getEmployeeActions(employee)" />
           </div>
-          <div class="dash-cell action-buttons">
+          <div class="dash-cell row-center action-buttons">
             <button
               class="btn-small btn-acid"
               @click="detailEmployee(employee.id)"
@@ -210,12 +210,5 @@ const getEmployeeActions = (employee) => [
   background: var(--accent);
   color: var(--text);
   font-weight: 700;
-}
-
-.dash-table-row .dash-cell:not(:first-child) {
-  text-align: center;
-  justify-content: center;
-  display: flex;
-  align-items: center;
 }
 </style>

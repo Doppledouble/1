@@ -3,6 +3,7 @@ import { ref, watch, onMounted, computed } from "vue";
 import api from "../services/api.js";
 import Multiselect from "vue-multiselect"
 import "vue-multiselect/dist/vue-multiselect.css"
+import DateTimePicker from "./DateTimePicker.vue";
 
 const props = defineProps({
   initialData: {
@@ -12,6 +13,7 @@ const props = defineProps({
       employee_id: "",
       location: "",
       quantity: 0,
+      assigned_at: null,
     }),
   },
 
@@ -61,6 +63,7 @@ const form = ref({
   location: null,
   quantity: 1,
   notes: "",
+  assigned_at:null,
 });
 
 const selectedItem = ref(null)
@@ -155,8 +158,6 @@ const submitForm = () => {
         />
       </div>
 
-
-
       <div class="form-group">
         <label>Catatan</label>
 
@@ -164,6 +165,17 @@ const submitForm = () => {
           v-model="form.notes"
           type="text"
         />
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Assignment</label>
+        <DateTimePicker
+          v-model="form.assigned_at"
+          placeholder="Pilih tanggal & waktu"
+        />
+        <small style="color: var(--text-muted)">
+          Kosongkan jika sekarang
+        </small>
       </div>
 
       <div class="form-actions">
