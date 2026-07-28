@@ -3,8 +3,8 @@ import { ref, reactive, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getItemHistory } from "../../services/transactionService.js";
 import { getItemById } from "../../services/itemService.js";
-import { formatDate } from "../../utils/formatDate.js";
-
+import { formatDate, toQueryDateString } from "../../utils/formatDate.js";
+import DateRangeFilter from "../../components/DateRangeFilter.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -29,8 +29,9 @@ const filters = reactive({
   employee: "",
   location: "",
   notes: "",
-  created_at: "",
 });
+
+const dateRange = ref({ start: null, end: null });
 
 const typeLabel = {
   add: "Penambahan",
@@ -76,7 +77,8 @@ const loadTransactions = async () => {
       employee: filters.employee || undefined,
       location: filters.location || undefined,
       notes: filters.notes || undefined,
-      created_at: filters.created_at || undefined,
+      date_from: toQueryDateString(dateRange.value.start),
+      date_to: toQueryDateString(dateRange.value.end),
     });
     transactions.value = res.data.items;
     txTotal.value = res.data.total;
@@ -112,13 +114,17 @@ const goToPage = (page) => {
 };
 
 let filterDebounce = null;
-watch(filters, () => {
-  clearTimeout(filterDebounce);
-  filterDebounce = setTimeout(() => {
-    txPage.value = 1;
-    loadTransactions();
-  }, 400);
-});
+watch(
+  [filters, dateRange],
+  () => {
+    clearTimeout(filterDebounce);
+    filterDebounce = setTimeout(() => {
+      txPage.value = 1;
+      loadTransactions();
+    }, 400);
+  },
+  { deep: true },
+);
 
 watch(
   () => route.params.itemId,
@@ -132,9 +138,7 @@ watch(
   { immediate: true },
 );
 
-const goBack = () => {
-  router.push({ name: "transactions-menu" });
-};
+const goBack = () => router.back();
 </script>
 
 <template>
@@ -217,7 +221,10 @@ const goBack = () => {
             <input v-model="filters.notes" placeholder="Cari catatan..." />
           </div>
           <div class="dash-cell">
-            <input v-model="filters.created_at" placeholder="dd/mm/yyyy" />
+            <DateRangeFilter
+              v-model="dateRange"
+              placeholder="Filter tanggal..."
+            />
           </div>
         </div>
 

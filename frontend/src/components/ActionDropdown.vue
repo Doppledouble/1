@@ -89,7 +89,7 @@ onUnmounted(() => {
 
 <template>
   <div class="action-dropdown">
-    <button ref="triggerRef" class="dropdown-trigger" @click="toggle">
+    <button ref="triggerRef" class="btn-ghost dropdown-trigger" @click="toggle">
       Aksi
       <i :class="['ti', isOpen ? 'ti-chevron-up' : 'ti-chevron-down']" />
     </button>
@@ -135,9 +135,6 @@ onUnmounted(() => {
   color: var(--text);
 }
 
-.dropdown-trigger:hover {
-  background: var(--surface);
-}
 </style>
 
 <style>

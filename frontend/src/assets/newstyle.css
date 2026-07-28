@@ -81,9 +81,9 @@ img {
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.card:hover {
+/* .card:hover {
   transform: translateY(-2px);
-}
+} */
 
 /* ===== Acid Button System ===== */
 .btn-acid {
@@ -1570,7 +1570,7 @@ img {
 }
 
 .emp-tx-row {
-  grid-template-columns: 1.3fr 1.8fr 1fr 0.8fr 1.5fr;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr;
 }
 
 .emp-tools-row.head,

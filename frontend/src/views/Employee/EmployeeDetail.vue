@@ -164,8 +164,8 @@ const goBack = () => router.back();
         <div class="dash-table">
           <div class="emp-tools-row head">
             <div>Nama Barang</div>
-            <div>Lokasi</div>
             <div>Jumlah</div>
+            <div>Lokasi</div>
             <div>Ditugaskan Pada</div>
           </div>
           <div v-if="currentTools.length === 0" class="emp-empty-row">
@@ -177,8 +177,8 @@ const goBack = () => router.back();
             class="emp-tools-row"
           >
             <div class="dash-cell-name">{{ tool.item_name }}</div>
-            <div>{{ tool.location || "-" }}</div>
             <div>{{ tool.quantity }}</div>
+            <div>{{ tool.location || "-" }}</div>
             <div>{{ formatDate(tool.assigned_at) }}</div>
           </div>
         </div>
@@ -191,17 +191,16 @@ const goBack = () => router.back();
         </div>
         <div class="dash-table">
           <div class="emp-tx-row head">
-            <div>Tanggal</div>
             <div>Barang</div>
             <div>Tipe</div>
             <div>Jumlah</div>
-            <div>Lokasi / Catatan</div>
+            <div>Lokasi</div>
+            <div>Tanggal</div>
           </div>
           <div v-if="transactions.length === 0" class="emp-empty-row">
             Belum ada transaksi.
           </div>
           <div v-for="tx in transactions" :key="tx.id" class="emp-tx-row">
-            <div>{{ formatDate(tx.created_at) }}</div>
             <div class="dash-cell-name">{{ tx.item_name }}</div>
             <div>
               <span :class="['type-badge', tx.transaction_type]">
@@ -209,7 +208,8 @@ const goBack = () => router.back();
               </span>
             </div>
             <div>{{ tx.quantity }}</div>
-            <div>{{ tx.location || tx.notes || "-" }}</div>
+            <div>{{ tx.location  || "-" }}</div>
+            <div>{{ formatDate(tx.created_at) }}</div>
           </div>
         </div>
 

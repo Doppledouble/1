@@ -164,7 +164,7 @@ const getAssignmentActions = (assignment) => [
               <input v-model="filters.location" placeholder="Cari lokasi..." />
             </div>
             <div class="dash-cell row-center">
-              <DateRangeFilter v-model="dateRange" placeholder="Filter tanggal assign..." />
+              <DateRangeFilter v-model="dateRange" placeholder="Filter tanggal assign (KLIK)" />
             </div>
           </div>
         </div>
